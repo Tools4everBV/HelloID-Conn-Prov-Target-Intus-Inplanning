@@ -1,52 +1,36 @@
-######################################################
+############################################################
 # HelloID-Conn-Prov-Target-Intus-Inplanning-Permissions
 # PowerShell V2
-######################################################
+############################################################
 
 # Enable TLS1.2
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor [System.Net.SecurityProtocolType]::Tls12
 
+
 try {
     Write-Information 'Retrieving permissions'
-    # <Paste your Json Permissions here> (More information can be found in the Readme)
-    $jsonPermissions = @'
-    [
-        {
-            "role": "Planner",
-            "resourceGroup": "Planner {{LocationOwn}}",
-            "exchangeGroup": "Company",
-            "shiftGroup": "Company",
-            "worklocationGroup": "Root",
-            "userGroup": "Root"
+    $permissions = @(
+        @{
+            RoleName = 'Planner'
         },
-        {
-            "role": "Leidinggevende",
-            "resourceGroup": "{{costcenterOwn}}",
-            "exchangeGroup": "Company",
-            "shiftGroup": "Company",
-            "worklocationGroup": "Root",
-            "userGroup": "Root"
+        @{
+            RoleName = 'Leidinggevende'
         },
-        {
-            "role": "ADMIN",
-            "resourceGroup": "ADMIN",
-            "exchangeGroup": "ADMIN",
-            "shiftGroup": "ADMIN",
-            "worklocationGroup": "Root",
-            "userGroup": "Root"
+        @{
+            RoleName = 'ADMIN'
         }
-    ]
-'@
+    )
 
-    $permissionList = $jsonPermissions | ConvertFrom-Json
-    foreach ($permission in $permissionList) {
-        $outputContext.Permissions.Add(@{
-                DisplayName    = $permission.PSObject.Properties.Name
+    # Make sure to test with special characters and if needed; add utf8 encoding.
+    foreach ($permission in $permissions) {
+        $outputContext.Permissions.Add(
+            @{
+                DisplayName    = $permission.RoleName
                 Identification = @{
-                    Reference   = $permission."$($permission.PSObject.Properties.Name)"
-                    DisplayName = $permission.PSObject.Properties.Name
+                    Reference = $permission.RoleName
                 }
-            })
+            }
+        )
     }
 }
 catch {

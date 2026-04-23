@@ -38,19 +38,18 @@ _HelloID-Conn-Prov-Target-Intus-Inplanning_ is a _target_ connector. The Intus I
 
 The following lifecycle actions are available:
 
-| Action                 | Description                                      |
-| ---------------------- | ------------------------------------------------ |
-| create.ps1             | PowerShell _create_ lifecycle action             |
-| delete.ps1             | -     |
-| disable.ps1            | PowerShell _disable_ lifecycle action            |
-| enable.ps1             | PowerShell _enable_ lifecycle action             |
-| update.ps1             | PowerShell _update_ lifecycle action             |
-| grantPermission.ps1    | PowerShell _grant_ lifecycle action              | This script is also used for the update in the entitlements
-| revokePermission.ps1   | PowerShell _revoke_ lifecycle action             |
-| permissions.ps1        | PowerShell _permissions_ lifecycle action        |
-| resources.ps1          | -       |
-| configuration.json     | Default _[Configuration.json](https://github.com/Tools4everBV/HelloID-Conn-Prov-Target-Intus-Inplanning/blob/main/configuration.json)_ |
-| fieldMapping.json      | Default _[FieldMapping.json](https://github.com/Tools4everBV/HelloID-Conn-Prov-Target-Intus-Inplanning/blob/main/fieldMapping.json)_   |
+| Action               | Description                                                                                                                            |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| create.ps1           | PowerShell _create_ lifecycle action                                                                                                   |
+| delete.ps1           | -                                                                                                                                      |
+| disable.ps1          | PowerShell _disable_ lifecycle action                                                                                                  |
+| enable.ps1           | PowerShell _enable_ lifecycle action                                                                                                   |
+| update.ps1           | PowerShell _update_ lifecycle action                                                                                                   |
+| subPermissions.ps1   | PowerShell _Handle all actions Script_ - lifecycle action                                                                              |
+| permissions.ps1      | PowerShell _permissions_ lifecycle action                                                                                              |
+| resources.ps1        | -                                                                                                                                      |
+| configuration.json   | Default _[Configuration.json](https://github.com/Tools4everBV/HelloID-Conn-Prov-Target-Intus-Inplanning/blob/main/configuration.json)_ |
+| fieldMapping.json    | Default _[FieldMapping.json](https://github.com/Tools4everBV/HelloID-Conn-Prov-Target-Intus-Inplanning/blob/main/fieldMapping.json)_   |
 
 ## Getting started
 
@@ -66,11 +65,11 @@ To properly setup the correlation:
 
 2. Specify the following configuration:
 
-    | Setting                   | Value                             |
-    | ------------------------- | --------------------------------- |
-    | Enable correlation        | `True`                            |
-    | Person correlation field  | Not Supported |
-    | Account correlation field | `username`                                |
+    | Setting                   | Value      |
+    | ------------------------- | ---------- |
+    | Enable correlation        | `True`     |
+    | Person correlation field  | ExternalId |
+    | Account correlation field | `username` |
 
 > [!TIP]
 > _For more information on correlation, please refer to our correlation [documentation](https://docs.helloid.com/en/provisioning/target-systems/powershell-v2-target-systems/correlation.html) pages_.
@@ -93,58 +92,48 @@ The following settings are required to connect to the API.
  - Before using this connector, ensure you have the appropriate Client ID and Client Secret in order to connect to the API.
 
 ### Remarks
-- Set the number of concurrent actions to 1. Otherwise, the 'get token' operation of one run will interfere with that of another run.
-- The username cannot be modified in Intus Inplanning or helloId since it serves as the account reference.
+- Set the number of concurrent actions to 1. Otherwise, the 'Get-Token' operation of one run will interfere with that of another run.
+- The username cannot be modified in Intus Inplanning or HelloID since it serves as the account reference.
 
 
 #### Permissions Remarks
-- A user in Intus Inplanning can have multiple roles with the same name. These roles cannot be managed by HelloID. The HelloID connector only supports managing unique role names.
-- The creation and update of entitlements utilize the same script, named grant.ps1.
-- The connector uses a pre-defined set of entitlements that are created in Intus Inplanning
-- The connector exclusively assigns a start date when a new entitlement is appended to an account. The start date remains unaltered when the user's entitlement is subsequently updated.
-- The grant script does not establish the end date; instead, the business rules handle the removal of entitlement when it becomes unnecessary. It is possible to modify this process to assign the attribute 'endDate'.
-- The permission script employs an inline JSON object to retrieve the permissions. Alternatively, it is possible to obtain this information from a file using the following command: ```$jsonPermissions = Get-Content "C:\IntusPermissions.json" | ConvertFrom-Json```. Please note that an agent is required to perform this operation.
-- When working with inline permissions in the permission.ps1 script, utilize the following structure:
-```JSON
-[
-    {
-        "Admin": {
-            "role": "Admin",
-            "resourceGroup": "Company",
-            "exchangeGroup": "Company",
-            "shiftGroup": "Diensten",
-            "worklocationGroup": null,
-            "userGroup": "n.v.t."
-        }
-    }
-]
-```
+- The "Unique Key" of the permissions is a combination of a role and a resource group. This means that you can have multiple permissions assignments with the same role and different resource groups, they will be treated as sub-permissions in HelloID based on the contracts in conditions. To accomplish this, use placeholder variables in the resource group, such as `{{CostCenterOwn}}` and `{{LocationOwn}}`, which will be replaced with actual values from the contract that is 'InConditions'.
+- Updating properties of granted roles is not always possible because they may not be relevant to the role. They are ignored, which can result in the API body not being updated. This can occur when exchangeGroup, shiftGroup, workLocationGroup, or userGroup are populated with placeholders, so an actual update of granted permissions is in that case ignored. This is a limitation of the API, not the connector.
 
-
-- You can utilize a variable within the JSON permissions, such as your own CostCenter, for example. Currently, an example variable named `{{costCenterOwn}}` AND `{{LocationOwn}}` is included in the grant script. You can integrate this variable name into your JSON within the permission script. Additionally, an example is provided in the grant script to substitute the variable with a value from the contract that is 'incondition'. It's important to note that this value must be recognized and established within Intus.
-
-**Example of the JSON permissions and the PowerShell code snippet**
-```JSON
-   "resourceGroup": "{{costCenterOwn}}",
-```
+- The Permissions.ps1 script defines only the role names (Planner, Leidinggevende, ADMIN)
+- The SubPermissions.ps1 script contains the permission body/mapping with the full structure for each role.
+- The permission mapping in the subPermissions.ps1 script uses the following structure, whereas the 'role' attribute corresponds to the permission in HelloID.
 
 ```PowerShell
-foreach ($contract in $personContext.Person.Contracts) {
-  ....
-        $mappedProperty = $contract.CostCenter.Name
-  
-        foreach ($property in $newRole.PSObject.Properties) {
-            if ($property.value -eq '{{costCenterOwn}}') {
-                if ([string]::IsNullOrEmpty($mappedProperty)) {
-                    throw 'Permission expects [{{costCenterOwn}}] to grant the permission the specified cost center is empty'
-                }
-                $newRole."$($property.name)" = $mappedProperty
-                Write-verbose "Replacing property: [$($property.name)] value: [{{costCenterOwn}}] with [$($mappedProperty)]"
-            }
-        }
-  ...
+$permissionMapping = @(
+    @{
+        role              = 'Planner'
+        resourceGroup     = 'Planner {{LocationOwn}}'
+        exchangeGroup     = 'Company'
+        shiftGroup        = 'Company'
+        worklocationGroup = 'Root'
+        userGroup         = 'Root'
+    },
+    @{
+        role              = 'Leidinggevende'
+        resourceGroup     = '{{CostCenterOwn}}'
+        exchangeGroup     = 'Company'
+        shiftGroup        = 'Company'
+        worklocationGroup = 'Root'
+        userGroup         = 'Root'
+    }
+)
+```
+- The placeholder values are resolved using the `$lookupValues` hashtable in the subPermissions.ps1 script:
+
+```PowerShell
+$lookupValues = @{
+    '{{LocationOwn}}'   = { $_.Division.Name }
+    '{{CostCenterOwn}}' = { $_.Department.ExternalId }
 }
 ```
+
+- The placeholder values must be existing values within Intus Inplanning before they can be used
 
 ## Getting help
 
