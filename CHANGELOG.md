@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file. The format 
 
 
 
-## [2.0.0] - 14-04-2026
+## [3.0.0] - 14-04-2026
 > Please note that this is a major update, and to switch to the New permissions the Reference is lost in HelloID.
 ### Added
 - All in one script for granting and revoking permissions to Intus InPlanning.
