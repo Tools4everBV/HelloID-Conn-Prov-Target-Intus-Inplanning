@@ -28,7 +28,8 @@ function Get-AccessToken {
             }
 
             Write-Output (Invoke-RestMethod @splatGetTokenParams).access_token
-        } catch {
+        }
+        catch {
             $PSCmdlet.ThrowTerminatingError($_)
         }
     }
@@ -77,24 +78,13 @@ try {
     $headers.Add('Content-Type', 'application/json')
     $headers.Add('Authorization', 'Bearer ' + $accessToken)
 
-    try {
-        $pageSize = 2000 #To-Do:  Paging did not work, but a big pagesize does.
-
-        $splatGetUserParams = @{
-            Uri     = "$($actionContext.Configuration.BaseUrl)/api/users?&limit=$pageSize"
-            Headers = $headers
-            Method  = 'GET'
-        }
-
-        $allUsers = Invoke-RestMethod @splatGetUserParams
-        Write-Verbose "Retrieved $($allUsers.Count) users. Total: $($allUsers.Count)" -Verbose
+    $splatGetUserParams = @{
+        Uri     = "$($actionContext.Configuration.BaseUrl)/api/users?limit=0"
+        Headers = $headers
+        Method  = 'GET'
     }
-    catch {
-
-        if (-not($_.ErrorDetails.Message -match '211 - The object does not exist.')) {
-            throw "Cannot get user error: [$($_.Exception.Message)]"
-        }
-    }
+    $allUsers = Invoke-RestMethod @splatGetUserParams
+    Write-Information "Retrieved $($allUsers.Count) users. Total: $($allUsers.Count)"
     
     # Process each user account
     foreach ($account in $allUsers) {
@@ -105,8 +95,6 @@ try {
                 $data[$field] = $account.$field
             }
         }
-
-    #write-verbose -verbose ($account | out-string)
 
         # Make sure the displayName has a value
         $displayName = $null
@@ -128,23 +116,17 @@ try {
     }
 
     Write-Information 'Intus-Inplanning account import completed'
-    $outputContext.success = $true
 }
 catch {
-    $outputContext.success = $false
     $ex = $PSItem
     if ($($ex.Exception.GetType().FullName -eq 'Microsoft.PowerShell.Commands.HttpResponseException') -or
         $($ex.Exception.GetType().FullName -eq 'System.Net.WebException')) {
         $errorObj = Resolve-Intus-InplanningError -ErrorObject $ex
-        $auditMessage = "Could not create or correlate Intus-Inplanning account. Error: $($errorObj.FriendlyMessage)"
         Write-Warning "Error at Line '$($errorObj.ScriptLineNumber)': $($errorObj.Line). Error: $($errorObj.ErrorDetails)"
+        Write-Error "Could not import Intus-Inplanning account entitlements. Error: $($errorObj.FriendlyMessage)"
     }
     else {
-        $auditMessage = "Could not create or correlate Intus-Inplanning account. Error: $($ex.Exception.Message)"
         Write-Warning "Error at Line '$($ex.InvocationInfo.ScriptLineNumber)': $($ex.InvocationInfo.Line). Error: $($ex.Exception.Message)"
+        Write-Error "Could not import Intus-Inplanning account entitlements. Error: $($ex.Exception.Message)"
     }
-    $outputContext.AuditLogs.Add([PSCustomObject]@{
-            Message = $auditMessage
-            IsError = $true
-        })
 }
