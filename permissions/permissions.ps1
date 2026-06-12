@@ -17,6 +17,9 @@ try {
             RoleName = 'Leidinggevende'
         },
         @{
+            RoleName = 'Consignatiedienst Cluster A'
+        },
+        @{
             RoleName = 'ADMIN'
         }
     )
