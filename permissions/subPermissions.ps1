@@ -187,8 +187,6 @@ try {
         }
     }
 
-    #Write-Warning ($correlatedAccount | ConvertTo-Json)
-
     if ($null -ne $correlatedAccount) {
         $lifecycleProcess = 'ManageSubPermissions'
         $currentRoles = [System.Collections.Generic.List[object]]::new()
@@ -250,14 +248,11 @@ try {
                             Write-Information "[DryRun] Grant access to permission $($permission.Name), will be executed during enforcement"
                         }
 
-                        Write-Warning ($currentRoles | ConvertTo-Json)
                         $existingRole = $currentRoles | Where-Object { $_.role -eq $permission.Value.role -and $_.resourceGroup -eq $permission.Value.resourceGroup }
                         if (-not $existingRole) {
-                            Write-Warning "not exist"
                             $null = $currentRoles.Add($permission.value)
                         }
                         elseif ($existingRole.count -eq 1) {
-                            Write-Warning "exist"
                             $null = $currentRoles.Remove($existingRole)
                             $null = $currentRoles.Add($permission.value)
                         }
@@ -542,14 +537,11 @@ try {
                             Write-Information "[DryRun] Grant access to permission $($permission.Name), will be executed during enforcement"
                         }
 
-                        Write-Warning ($currentRoles | ConvertTo-Json)
                         $existingRole = $currentRoles | Where-Object { $_.role -eq $permission.Value.role -and $_.resourceGroup -eq $permission.Value.resourceGroup }
                         if (-not $existingRole) {
-                            Write-Warning "not exist"
                             $null = $currentRoles.Add($permission.value)
                         }
                         elseif ($existingRole.count -eq 1) {
-                            Write-Warning "exist"
                             $null = $currentRoles.Remove($existingRole)
                             $null = $currentRoles.Add($permission.value)
                         }
