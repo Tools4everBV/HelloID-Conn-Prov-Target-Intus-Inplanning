@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com), and this project adheres to [Semantic Versioning](https://semver.org).
 
+## [3.0.2] - 12-06-2026
+
+### Changed
+- Support '-' in permission names
+- Made permission name and role name independant
+- Minor fixes
+
+### Fixed
+- Issue #8
+
 ## [3.0.1] - 01-05-2026
 
 ### Added

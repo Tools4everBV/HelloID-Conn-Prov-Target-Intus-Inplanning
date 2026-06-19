@@ -7,24 +7,32 @@
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor [System.Net.SecurityProtocolType]::Tls12
 
 # Script Mapping lookup values and permission mapping
-$permissionMapping = @(
-    @{
+$permissionMapping = @{
+    'Planner' = @{
         role              = 'Planner'
         resourceGroup     = 'Planner {{LocationOwn}}'
         exchangeGroup     = 'Company'
         shiftGroup        = 'Company'
         worklocationGroup = 'Root'
         userGroup         = 'Root'
-    },
-    @{
+    }
+    'Leidinggevende' = @{
         role              = 'Leidinggevende'
         resourceGroup     = '{{CostCenterOwn}}'
         exchangeGroup     = 'Company'
         shiftGroup        = 'Company'
         worklocationGroup = 'Root'
         userGroup         = 'Root'
-    },
-    @{
+    }
+    'Consignatiedienst Cluster A' = @{
+        role              = 'Consignatiedienst'
+        resourceGroup     = 'Cluster A'
+        exchangeGroup     = 'Company'
+        shiftGroup        = 'Company'
+        worklocationGroup = 'Root'
+        userGroup         = 'Root'
+    }
+    'ADMMIN' = @{
         role              = 'ADMIN'
         resourceGroup     = 'ADMIN'
         exchangeGroup     = 'ADMIN'
@@ -32,7 +40,7 @@ $permissionMapping = @(
         worklocationGroup = 'Root'
         userGroup         = 'Root'
     }
-)
+}
 
 # Lookup values which are used in the mapping to determine {{REPLACEMENT}}
 $lookupValues = @{
@@ -145,7 +153,7 @@ try {
     }
 
     if ($actionContext.Operation -ne 'revoke' ) {
-        $subPermission = $permissionMapping | Where-Object { $_.role -eq $actionContext.References.Permission.Reference }
+        $subPermission = $permissionMapping[$actionContext.References.Permission.Reference]
         if ($null -eq $subPermission) {
             throw "Permission [$($actionContext.References.Permission.Reference)] does not have a valid script mapping defined"
         }
@@ -214,7 +222,7 @@ try {
                                 $mappedProperty = ($contract | Select-Object $lookupValue).$lookupValue
                                 $null = Resolve-ReplaceHolderValue -ReplaceVariable $replaceVariable.Key -MappedProperty $mappedProperty -Contract  $contract -DesiredPermission $desiredPermission
                             }
-                            $desiredPermissionUniqueKey = "$($actionContext.References.Permission.Reference)-$($desiredPermission.ResourceGroup)"
+                            $desiredPermissionUniqueKey = "$($desiredPermission.Role)&&$($desiredPermission.ResourceGroup)"
                             $desiredPermissions[$desiredPermissionUniqueKey] = $desiredPermission
                         }
                     }
@@ -223,7 +231,7 @@ try {
                 # Processing Static permissions body without placeholder(s)
                 else {
                     $desiredPermission = $subPermission.PSObject.Copy()
-                    $desiredPermissionUniqueKey = "$($actionContext.References.Permission.Reference)-$($desiredPermission.ResourceGroup)"
+                    $desiredPermissionUniqueKey = "$($desiredPermission.Role)&&$($desiredPermission.ResourceGroup)"
                     $desiredPermissions[$desiredPermissionUniqueKey] = $desiredPermission
                 }
 
@@ -239,13 +247,14 @@ try {
                         if ($actionContext.DryRun -eq $true) {
                             Write-Information "[DryRun] Grant access to permission $($permission.Name), will be executed during enforcement"
                         }
+						
                         $existingRole = $currentRoles | Where-Object { $_.role -eq $permission.Value.role -and $_.resourceGroup -eq $permission.Value.resourceGroup }
                         if (-not $existingRole) {
                             $null = $currentRoles.Add($permission.value)
                         }
                         elseif ($existingRole.count -eq 1) {
-                            $currentRoles.Remove($existingRole)
-                            $currentRoles.Add($permission.value)
+                            $null = $currentRoles.Remove($existingRole)
+                            $null = $currentRoles.Add($permission.value)
                         }
 
                         $outputContext.AuditLogs.Add([PSCustomObject]@{
@@ -259,8 +268,8 @@ try {
 
             # Process and calculate current permissions Revoke
             foreach ($permission in $currentPermissions.GetEnumerator()) {
-                $roleName = $permission.Name -split '-' | Select-Object -First 1
-                $resourceGroup = $permission.Name -split '-' | Select-Object -Last 1
+                $roleName = $permission.Name -split '&&' | Select-Object -First 1
+                $resourceGroup = $permission.Name -split '&&' | Select-Object -Last 1
                 if (-not $desiredPermissions.ContainsKey($permission.Name)) {
                     if ($actionContext.DryRun -eq $true) {
                         Write-Information "[DryRun] Revoke access to permission $($permission.Name), will be executed during enforcement"

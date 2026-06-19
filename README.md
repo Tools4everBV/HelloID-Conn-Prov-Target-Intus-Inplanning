@@ -6,7 +6,7 @@
 
 <br />
 <p align="center">
-  <img src="https://www.tools4ever.nl/connector-logos/intus-logo.png">
+  <img src="https://github.com/Tools4everBV/HelloID-Conn-Prov-Target-Intus-Inplanning/blob/main/Logo.png?raw=true">
 </p>
 
 
@@ -139,9 +139,6 @@ $lookupValues = @{
 
 > [!TIP]
 > _For more information on how to configure a HelloID PowerShell connector, please refer to our [documentation](https://docs.helloid.com/en/provisioning/target-systems/powershell-v2-target-systems.html) pages_.
-
-> [!TIP]
-> _If you need help, feel free to ask questions on our [forum](https://forum.helloid.com/forum/helloid-connectors/provisioning/1481-helloid-conn-prov-target-intus)_
 
 ## HelloID docs
 
