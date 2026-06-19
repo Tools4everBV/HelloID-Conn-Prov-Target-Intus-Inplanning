@@ -7,7 +7,10 @@ All notable changes to this project will be documented in this file. The format 
 ### Changed
 - Support '-' in permission names
 - Made permission name and role name independant
-- Minor fixes 
+- Minor fixes
+
+### Fixed
+- Issue #8
 
 ## [3.0.1] - 01-05-2026
 
