@@ -87,7 +87,7 @@ try {
         }
         $correlatedAccount = Invoke-RestMethod @splatGetUserParams
     } catch {
-        if ( -not ($_.ErrorDetails.Message -match '211 - Object does not exist')) {
+        if ( -not ($_.ErrorDetails.Message -match '211 - .*does not exist')) {
             throw "Cannot get user error: [$($_.Exception.Message)]"
         }
     }
