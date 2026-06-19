@@ -6,7 +6,7 @@
 
 <br />
 <p align="center">
-  <img src="https://www.tools4ever.nl/connector-logos/intus-logo.png">
+  <img src="https://github.com/Tools4everBV/HelloID-Conn-Prov-Target-Intus-Inplanning/blob/main/Logo.png?raw=true">
 </p>
 
 
