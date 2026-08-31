@@ -30,26 +30,26 @@
 
 _HelloID-Conn-Prov-Target-Intus-Inplanning_ is a _target_ connector. The Intus Inplanning connector facilitates the creation, updating, enabling, and disabling of user accounts in Intus Inplanning. Additionally, it grants and revokes roles as entitlements to the user account.
 
-| Endpoint                                          | Description                                   |
-| ------------------------------------------------- | --------------------------------------------- |
-| /api/token                                        | Gets the Token to connect with the api (POST) |
-| /api/users/AccountReference                       | get user based on the account reference (GET) |
-| /api/users                                        | creates and updates the user (POST), (PUT)    |
+| Endpoint                    | Description                                   |
+| --------------------------- | --------------------------------------------- |
+| /api/token                  | Gets the Token to connect with the api (POST) |
+| /api/users/AccountReference | get user based on the account reference (GET) |
+| /api/users                  | creates and updates the user (POST), (PUT)    |
 
 The following lifecycle actions are available:
 
-| Action               | Description                                                                                                                            |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| create.ps1           | PowerShell _create_ lifecycle action                                                                                                   |
-| delete.ps1           | -                                                                                                                                      |
-| disable.ps1          | PowerShell _disable_ lifecycle action                                                                                                  |
-| enable.ps1           | PowerShell _enable_ lifecycle action                                                                                                   |
-| update.ps1           | PowerShell _update_ lifecycle action                                                                                                   |
-| subPermissions.ps1   | PowerShell _Handle all actions Script_ - lifecycle action                                                                              |
-| permissions.ps1      | PowerShell _permissions_ lifecycle action                                                                                              |
-| resources.ps1        | -                                                                                                                                      |
-| configuration.json   | Default _[Configuration.json](https://github.com/Tools4everBV/HelloID-Conn-Prov-Target-Intus-Inplanning/blob/main/configuration.json)_ |
-| fieldMapping.json    | Default _[FieldMapping.json](https://github.com/Tools4everBV/HelloID-Conn-Prov-Target-Intus-Inplanning/blob/main/fieldMapping.json)_   |
+| Action             | Description                                                                                                                            |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| create.ps1         | PowerShell _create_ lifecycle action                                                                                                   |
+| delete.ps1         | -                                                                                                                                      |
+| disable.ps1        | PowerShell _disable_ lifecycle action                                                                                                  |
+| enable.ps1         | PowerShell _enable_ lifecycle action                                                                                                   |
+| update.ps1         | PowerShell _update_ lifecycle action                                                                                                   |
+| subPermissions.ps1 | PowerShell _Handle all actions Script_ - lifecycle action                                                                              |
+| permissions.ps1    | PowerShell _permissions_ lifecycle action                                                                                              |
+| resources.ps1      | -                                                                                                                                      |
+| configuration.json | Default _[Configuration.json](https://github.com/Tools4everBV/HelloID-Conn-Prov-Target-Intus-Inplanning/blob/main/configuration.json)_ |
+| fieldMapping.json  | Default _[FieldMapping.json](https://github.com/Tools4everBV/HelloID-Conn-Prov-Target-Intus-Inplanning/blob/main/fieldMapping.json)_   |
 
 ## Getting started
 
@@ -65,11 +65,11 @@ To properly setup the correlation:
 
 2. Specify the following configuration:
 
-    | Setting                   | Value      |
-    | ------------------------- | ---------- |
-    | Enable correlation        | `True`     |
-    | Person correlation field  | ExternalId |
-    | Account correlation field | `username` |
+    | Setting                   | Value      |                         |
+    | ------------------------- | ---------- | ----------------------- |
+    | Enable correlation        | `True`     |                         |
+    | Person correlation field  | ExternalId |                         |
+    | Account correlation field | `username` | **Only field supported* |
 
 > [!TIP]
 > _For more information on correlation, please refer to our correlation [documentation](https://docs.helloid.com/en/provisioning/target-systems/powershell-v2-target-systems/correlation.html) pages_.
@@ -82,11 +82,11 @@ The field mapping can be imported by using the _fieldMapping.json_ file.
 
 The following settings are required to connect to the API.
 
-| Setting       | Description                             | Mandatory   |
-| ------------- | --------------------------------------- | ----------- |
-| Client id     | The Client id to connect to the API     | Yes         |
-| Client secret | The Client Secret to connect to the API | Yes         |
-| BaseUrl       | The URL to the API                      | Yes         |
+| Setting       | Description                             | Mandatory |
+| ------------- | --------------------------------------- | --------- |
+| Client id     | The Client id to connect to the API     | Yes       |
+| Client secret | The Client Secret to connect to the API | Yes       |
+| BaseUrl       | The URL to the API                      | Yes       |
 
 ### Prerequisites
  - Before using this connector, ensure you have the appropriate Client ID and Client Secret in order to connect to the API.

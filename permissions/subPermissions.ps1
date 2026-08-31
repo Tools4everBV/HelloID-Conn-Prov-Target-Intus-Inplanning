@@ -175,9 +175,12 @@ try {
     Write-Information 'Verifying if a InPlanning account exists'
     try {
         $splatGetUserParams = @{
-            Uri     = "$($actionContext.Configuration.BaseUrl)/api/users/$($actionContext.References.Account)"
+            Uri     = "$($actionContext.Configuration.BaseUrl)/api/users/retrieve"
             Headers = $headers
-            Method  = 'GET'
+            Method  = 'POST'
+            Body    = @{
+                username = $($actionContext.References.Account)
+            }
         }
         $correlatedAccount = Invoke-RestMethod @splatGetUserParams
     }
@@ -247,7 +250,7 @@ try {
                         if ($actionContext.DryRun -eq $true) {
                             Write-Information "[DryRun] Grant access to permission $($permission.Name), will be executed during enforcement"
                         }
-						
+
                         $existingRole = $currentRoles | Where-Object { $_.role -eq $permission.Value.role -and $_.resourceGroup -eq $permission.Value.resourceGroup }
                         if (-not $existingRole) {
                             $null = $currentRoles.Add($permission.value)
