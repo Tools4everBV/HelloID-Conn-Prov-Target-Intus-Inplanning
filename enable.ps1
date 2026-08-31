@@ -80,9 +80,12 @@ try {
 
     try {
         $splatGetUserParams = @{
-            Uri     = "$($actionContext.Configuration.BaseUrl)/api/users/$($actionContext.References.Account)"
+            Uri     = "$($actionContext.Configuration.BaseUrl)/api/users/retrieve"
             Headers = $headers
-            Method  = 'GET'
+            Method  = 'POST'
+            Body    = @{
+                username = $($actionContext.References.Account)
+            }
         }
         $correlatedAccount = Invoke-RestMethod @splatGetUserParams
     } catch {

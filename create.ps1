@@ -91,9 +91,12 @@ try {
 
         try {
             $splatGetUserParams = @{
-                Uri     = "$($actionContext.Configuration.BaseUrl)/api/users/$correlationValue"
+                Uri     = "$($actionContext.Configuration.BaseUrl)/api/users/retrieve"
                 Headers = $headers
-                Method  = 'GET'
+                Method  = 'POST'
+                Body    = @{
+                    username = $correlationValue
+                }
             }
             $correlatedAccount = Invoke-RestMethod @splatGetUserParams
         }

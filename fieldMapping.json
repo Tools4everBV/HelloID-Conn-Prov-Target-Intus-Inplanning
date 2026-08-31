@@ -20,7 +20,7 @@
     },
     {
       "Name": "username",
-      "Description": "",
+      "Description": "maxLength: 60",
       "Type": "Text",
       "MappingActions": [
         {
