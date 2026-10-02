@@ -174,19 +174,18 @@ try {
 
     Write-Information 'Verifying if a InPlanning account exists'
     try {
+        $body = @{ username = $actionContext.References.Account } | ConvertTo-Json
         $splatGetUserParams = @{
             Uri     = "$($actionContext.Configuration.BaseUrl)/api/users/retrieve"
             Headers = $headers
             Method  = 'POST'
-            Body    = @{
-                username = $($actionContext.References.Account)
-            }
+            Body    = [System.Text.Encoding]::UTF8.GetBytes($body)
         }
         $correlatedAccount = Invoke-RestMethod @splatGetUserParams
     }
     catch {
         if ( -not ($_.ErrorDetails.Message -match '211 - .*does not exist')) {
-            $correlatedAccount = $null
+            throw
         }
     }
 

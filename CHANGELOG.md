@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com), and this project adheres to [Semantic Versioning](https://semver.org).
 
+## [4.0.1] - 30-09-2026
+
+### Fixed
+- Send UTF-8 JSON when retrieving users in lifecycle and sub-permission scripts.
+- Preserve API error details for failed user lookups instead of treating unexpected errors as missing users.
+
 ## [4.0.0] - 28-08-2026
 > [!WARNING]
 > **Minimum version requirement** <br>
